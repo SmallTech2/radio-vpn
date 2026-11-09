@@ -2,6 +2,70 @@
 
 Les commandes ci-dessous concernent un serveur déjà installé.
 
+## Gestion automatique des logs
+
+Le paquet `logrotate` est installé explicitement et `logrotate.timer` est activé.
+Le fichier `/etc/logrotate.d/openvpn` configure la rotation quotidienne de
+`/var/log/openvpn/openvpn.log`, avec conservation de **7 archives compressées**.
+Les fichiers absents ou vides sont ignorés. `openvpn-status.log` est un fichier
+d'état réécrit automatiquement : il n'est pas inclus dans cette rotation.
+
+La méthode `copytruncate` copie le journal puis tronque le fichier actif : OpenVPN
+continue d'écrire sans redémarrage. Elle présente un faible risque de perte de lignes
+entre la copie et la troncature. La rotation quotidienne **n'est pas un plafond strict
+de taille** : un journal très actif peut grossir entre deux exécutions.
+
+`/etc/systemd/journald.conf.d/99-radio-limits.conf` fixe `SystemMaxUse=200M` pour
+le stockage persistant et `RuntimeMaxUse=50M` pour le stockage volatil. Ces limites
+concernent journald, pas les fichiers OpenVPN. Journald supprime les anciens fichiers
+archivés pour respecter ses limites ; ses fichiers actifs et les autres journaux du
+système peuvent encore occuper de l'espace. Surveillez donc aussi l'espace disque.
+
+Commandes de contrôle (le mode `--debug` ne déclenche aucune rotation) :
+
+```sh
+sudo logrotate --debug /etc/logrotate.d/openvpn
+systemctl list-timers --all logrotate.timer
+systemctl --no-pager status logrotate.timer
+sudo systemd-analyze cat-config systemd/journald.conf
+sudo journalctl --disk-usage
+sudo du -sh /var/log/openvpn /var/log/journal /run/log/journal 2>/dev/null
+df -h /
+```
+
+### Appliquer à un VPS déjà installé
+
+Aucune réinstallation ni aucun redémarrage d'OpenVPN n'est nécessaire. Exécutez :
+
+```bash
+sudo apt update
+sudo apt install -y logrotate
+sudo install -d -m 755 -o root -g root /etc/logrotate.d /etc/systemd/journald.conf.d
+sudo tee /etc/logrotate.d/openvpn >/dev/null <<'EOF'
+/var/log/openvpn/openvpn.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
+EOF
+sudo tee /etc/systemd/journald.conf.d/99-radio-limits.conf >/dev/null <<'EOF'
+[Journal]
+SystemMaxUse=200M
+RuntimeMaxUse=50M
+EOF
+sudo chown root:root /etc/logrotate.d/openvpn /etc/systemd/journald.conf.d/99-radio-limits.conf
+sudo chmod 644 /etc/logrotate.d/openvpn /etc/systemd/journald.conf.d/99-radio-limits.conf
+sudo logrotate --debug /etc/logrotate.d/openvpn
+sudo systemctl restart systemd-journald.service
+sudo systemctl enable --now logrotate.timer
+```
+
+Vérifiez ensuite les contrôles ci-dessus. Seul journald est redémarré ; les services
+OpenVPN et OpenVPN UI ne sont pas interrompus.
+
 ## Renouvellement automatique de la CRL
 
 Commandes de contrôle et de renouvellement :

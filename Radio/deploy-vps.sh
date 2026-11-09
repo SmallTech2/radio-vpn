@@ -4,7 +4,7 @@
 set -Eeuo pipefail
 umask 077
 REPO='SmallTech2/radio-vpn'
-RELEASE_TAG="${RADIO_RELEASE_TAG:-radio-v2.3}"
+RELEASE_TAG="${RADIO_RELEASE_TAG:-radio-v2.4}"
 SOURCE_REF="${RADIO_SOURCE_REF:-}"
 INSTALL_ROOT='/opt/openvpn-ui-runtime'
 PREPARATION_STATE='/var/lib/radio-vpn/debian-upgrade-boot-id'
@@ -277,7 +277,7 @@ install_radio(){
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get install -y --no-install-recommends sudo openssh-server ca-certificates curl unzip tar \
-    openvpn easy-rsa nftables openssl python3 oathtool qrencode iproute2 util-linux procps
+    openvpn easy-rsa nftables openssl python3 oathtool qrencode iproute2 util-linux procps logrotate
   TMP="$(mktemp -d)"; mkdir -p "$TMP/src" "$TMP/bin"
   printf '%s\n' "$pubkey" > "$TMP/admin.pub"
   ssh-keygen -lf "$TMP/admin.pub" >/dev/null || die 'Cle publique SSH illisible.'
@@ -315,7 +315,7 @@ install_radio(){
   for f in genclient.sh write-client-profile.sh generate_ca_and_server_certs.sh oath.sh remove.sh renew.sh restart.sh revoke.sh rmcert.sh secure-ssh.sh; do
     [[ -s "$TMP/src/Radio/scripts/$f" ]] || die "Script absent : $f"
   done
-  for f in app.conf openvpn-server-config.tpl openvpn-client-config.tpl easyrsa-vars.tpl openvpn-ui.service nftables.conf.tpl; do
+  for f in app.conf openvpn-server-config.tpl openvpn-client-config.tpl easyrsa-vars.tpl openvpn-ui.service nftables.conf.tpl openvpn.logrotate 99-radio-limits.conf; do
     [[ -s "$TMP/src/Radio/config/$f" ]] || die "Modele absent : $f"
   done
   for f in static views swagger; do [[ -d "$TMP/bin/$f" ]] || die "Ressources UI absentes : $f"; done
@@ -346,6 +346,7 @@ install_radio(){
   install -d -m 755 "$INSTALL_ROOT" "$INSTALL_ROOT/conf" /opt/scripts /etc/openvpn/config \
     /etc/openvpn/clients /etc/openvpn/staticclients /var/log/openvpn
   install -d -m 700 "$INSTALL_ROOT/db"
+  configure_logs
   install -m 755 "$TMP/bin/openvpn-ui" "$INSTALL_ROOT/openvpn-ui"
   cp -a "$TMP/bin/static" "$TMP/bin/views" "$TMP/bin/swagger" "$INSTALL_ROOT/"
   install -m 644 "$TMP/src/LICENSE" "$INSTALL_ROOT/LICENSE"
@@ -405,6 +406,16 @@ install_radio(){
   echo "GUI depuis le VPN : http://$server_ip:8080"
   echo "Tunnel SSH : ssh -L 8080:127.0.0.1:8080 $admin_user@$public_ip"
   echo "Creer les clients avec une IPv4 fixe du reseau $net. Aucun redirect-gateway."
+}
+
+configure_logs(){
+  log 'Rotation OpenVPN et limites du journal systemd'
+  install -d -m 755 -o root -g root /etc/logrotate.d /etc/systemd/journald.conf.d
+  install -m 644 -o root -g root "$TMP/src/Radio/config/openvpn.logrotate" /etc/logrotate.d/openvpn
+  install -m 644 -o root -g root "$TMP/src/Radio/config/99-radio-limits.conf" /etc/systemd/journald.conf.d/99-radio-limits.conf
+  logrotate --debug /etc/logrotate.d/openvpn
+  systemctl restart systemd-journald.service
+  systemctl enable --now logrotate.timer
 }
 
 install_crl_timer(){

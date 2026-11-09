@@ -46,7 +46,10 @@ jobs:
       - name: Test initialization for all three networks
         env:
           RADIO_TEST_BINARY: ${{ github.workspace }}/dist/openvpn-ui
-        run: python3 -B -m unittest discover -s test -p 'test_*.py' -v
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends logrotate
+          python3 -B -m unittest discover -s test -p 'test_*.py' -v
       - name: Test real Easy-RSA certificates and persistent revocation
         run: |
           sudo apt-get update

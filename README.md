@@ -21,6 +21,7 @@ Après une installation réussie, le serveur dispose :
 - D'un pare-feu nftables : SSH et UDP 1194 accessibles publiquement ; interface Web accessible par VPN ou tunnel SSH.
 - D'IPv6 désactivé de façon persistante, après validation de l'accès SSH en IPv4.
 - Des composants du clavier console Debian et de l'application de la disposition configurée avec `setupcon --force`.
+- D'une [gestion automatique des logs](docs/maintenance.md#gestion-automatique-des-logs) : rotation OpenVPN et limites journald.
 
 Créez ensuite les clients dans l'interface, attribuez leurs IP fixes et téléchargez
 leurs profils `.ovpn` avec `tls-crypt`. L'ajout d'un client ne redémarre pas OpenVPN.
@@ -29,7 +30,7 @@ Le serveur n'est pas configuré comme passerelle Internet pour les clients.
 
 ## Version stable et démarrage rapide
 
-Version publiée : **[radio-v2.3](https://github.com/SmallTech2/radio-vpn/releases/tag/radio-v2.3)**.
+Version publiée : **[radio-v2.4](https://github.com/SmallTech2/radio-vpn/releases/tag/radio-v2.4)**.
 Les scripts, le binaire Linux AMD64 et les ressources sont associés au même commit.
 Les empreintes SHA-256 sont fournies avec les fichiers de la Release.
 
@@ -41,7 +42,7 @@ Le pare-feu de l'hébergeur doit autoriser le port SSH utilisé et UDP 1194.
 sudo apt update
 sudo apt install -y curl
 curl --fail --location --proto '=https' --proto-redir '=https' \
-  https://raw.githubusercontent.com/SmallTech2/radio-vpn/radio-v2.3/Radio/deploy-vps.sh \
+  https://raw.githubusercontent.com/SmallTech2/radio-vpn/radio-v2.4/Radio/deploy-vps.sh \
   -o deploy-vps.sh
 sudo bash deploy-vps.sh
 ```

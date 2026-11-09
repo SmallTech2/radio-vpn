@@ -12,6 +12,8 @@ d'exploitation.
 | `easyrsa-vars.tpl` | Modèle des paramètres Easy-RSA |
 | `openvpn-ui.service` | Unité systemd de l'interface, fichier d'environnement et dépendance à nftables |
 | `nftables.conf.tpl` | Règles réseau ; `@SSH_PORTS@` reçoit les ports SSH effectifs |
+| `openvpn.logrotate` | Rotation de `/var/log/openvpn/openvpn.log`, installé dans `/etc/logrotate.d/openvpn` |
+| `99-radio-limits.conf` | Limites journald, installé dans `/etc/systemd/journald.conf.d/` |
 
 Les marqueurs `@...@` sont remplacés par le script de déploiement ; les expressions
 `{{ ... }}` sont rendues par l'application. Les modèles installés pour l'UI se trouvent
