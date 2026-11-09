@@ -1,0 +1,29 @@
+# armv5l raspberry pi 1/zero 32bit: FROM arm32v5/golang:1.20.14-bookworm, armv7l raspberry pi 2/3/4 32bit: FROM arm32v7/golang:1.26.5-bookworm
+# AMD64 64bit and armv8l raspberry pi 3/4 64bit: FROM golang:1.26.5-bookworm
+FROM DEFINE-YOUR-ARCH
+
+LABEL maintainer="Mr.Philipp <d3vilh@github.com>"
+
+# Set the working directory to /beego and installing dependencies
+WORKDIR /beego
+RUN apt-get update && apt-get install git musl-tools -y
+
+# Enable go modules
+ENV GO111MODULE=on
+ENV CGO_ENABLED=1
+
+# Copy the go.mod and go.sum files to the container
+COPY go.mod go.sum ./
+
+# Download the dependencies
+RUN go mod download
+
+# Install the beego and bee packages
+RUN go install github.com/beego/bee/v2@develop
+
+# Setting working directory to /app and getting qrencode from github
+WORKDIR /app
+RUN git clone https://github.com/d3vilh/qrencode
+
+# Set the working directory to /
+WORKDIR /

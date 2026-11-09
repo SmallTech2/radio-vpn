@@ -1,0 +1,19 @@
+[Unit]
+Description=OpenVPN UI
+After=network-online.target
+Wants=network-online.target
+After=nftables.service
+Requires=nftables.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/openvpn-ui-runtime
+Environment=OPENVPN_ADMIN_USERNAME=admin
+EnvironmentFile=/etc/openvpn-ui.env
+ExecStart=/opt/openvpn-ui-runtime/openvpn-ui
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

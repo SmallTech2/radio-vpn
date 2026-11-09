@@ -1,0 +1,61 @@
+name: Radio VPN - Publish radio-v2.3
+
+on:
+  push:
+    tags: [radio-v2.3]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout exact stable tag
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: refs/tags/radio-v2.3
+          persist-credentials: false
+      - name: Retrieve successful build of this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          SOURCE_COMMIT=$(git rev-parse HEAD)
+          [[ "$SOURCE_COMMIT" == "$GITHUB_SHA" ]]
+          RUN_ID=$(gh api "repos/$GH_REPO/actions/workflows/radio-build.yml/runs?head_sha=$SOURCE_COMMIT&event=push&status=success&per_page=5" --jq '.workflow_runs[0].id')
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo 'Aucune compilation validee pour ce commit exact.' >&2; exit 1; }
+          gh run download "$RUN_ID" --repo "$GH_REPO" --name radio-openvpn-ui-linux-amd64 --dir dist
+          [[ "$(cat dist/source-commit.txt)" == "$SOURCE_COMMIT" ]]
+          [[ "$(cat dist/deployment-source-commit.txt)" == "$SOURCE_COMMIT" ]]
+          (cd dist; sha256sum -c openvpn-ui.sha256; sha256sum -c radio-openvpn-ui-linux-amd64.zip.sha256)
+          mkdir "$RUNNER_TEMP/radio-v2.3"
+          unzip -q dist/radio-openvpn-ui-linux-amd64.zip -d "$RUNNER_TEMP/radio-v2.3"
+          (cd "$RUNNER_TEMP/radio-v2.3"; sha256sum -c SHA256SUMS)
+          cmp dist/openvpn-ui "$RUNNER_TEMP/radio-v2.3/openvpn-ui"
+          python3 - "$SOURCE_COMMIT" <<'PY'
+          import pathlib, subprocess, sys, zipfile
+          commit = sys.argv[1]
+          with zipfile.ZipFile('dist/radio-openvpn-ui-linux-amd64.zip') as archive:
+              for name in ('source-commit.txt', 'deployment-source-commit.txt'):
+                  assert archive.read(name).decode().strip() == commit
+              assert ('vcs.revision=' + commit).encode() in archive.read('openvpn-ui')
+              names = subprocess.check_output(['git', 'ls-files', 'Radio', 'docs', 'README.md', 'LICENSE', 'static', 'views', 'swagger']).decode().splitlines()
+              for name in names:
+                  assert archive.read(name) == pathlib.Path(name).read_bytes(), name
+          PY
+          printf 'Radio VPN : OpenVPN et OpenVPN UI natifs sur Debian 13 AMD64.\n\nCompte Linux configurable, SSH par cle verifie, IPv6 desactive, clients a IP fixes et interface Web protegee par nftables.\n\nCommit : %s\nTests et compilation : https://github.com/%s/actions/runs/%s\n\nLes controles automatises ne constituent pas une validation sur VPS reel, notamment apres redemarrage.\n' "$SOURCE_COMMIT" "$GH_REPO" "$RUN_ID" > "$RUNNER_TEMP/radio-v2.3-notes.md"
+      - name: Publish radio-v2.3 from verified artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create radio-v2.3 --verify-tag --latest --target "$GITHUB_SHA" \
+            --title 'Radio VPN - radio-v2.3' --notes-file "$RUNNER_TEMP/radio-v2.3-notes.md" \
+            dist/radio-openvpn-ui-linux-amd64.zip dist/radio-openvpn-ui-linux-amd64.zip.sha256 \
+            dist/openvpn-ui dist/openvpn-ui.sha256 dist/source-commit.txt dist/deployment-source-commit.txt

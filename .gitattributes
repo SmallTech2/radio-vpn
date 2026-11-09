@@ -1,0 +1,4 @@
+/Radio/*.sh text eol=lf
+/Radio/scripts/*.sh text eol=lf
+/test/*.sh text eol=lf
+/.github/workflows/*.yml text eol=lf

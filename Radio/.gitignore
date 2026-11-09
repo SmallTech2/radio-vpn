@@ -1,0 +1,38 @@
+# --- Kit de déploiement et sauvegardes : JAMAIS dans Git ---
+*.tgz
+*.tar
+*.tar.gz
+*.sha256
+*.zip
+*.bak
+*.orig
+
+# --- Secrets et matériel cryptographique ---
+*.ovpn
+*.key
+*.crt
+*.csr
+*.pem
+*.p12
+*.pfx
+pki/
+easy-rsa/pki/
+ta.key
+ca.key
+
+# --- Mots de passe et variables locales ---
+*.env
+.env*
+*password*
+*passwd*
+*secret*
+
+# --- Base de données et journaux de l'application ---
+*.db
+*.sqlite
+*.log
+
+# --- Clés SSH ---
+id_rsa*
+id_ed25519*
+*.ppk

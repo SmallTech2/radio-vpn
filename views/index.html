@@ -1,0 +1,267 @@
+{{ template "layout/base.html" . }}
+
+{{define "head"}}
+<title>OpenVPN UI</title>
+{{end}}
+
+{{define "body"}}
+
+<div class="row">
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-info shadow">
+      <div class="inner">
+        <h3>Clients: {{ .ovstats.NClients }}</h3>
+        <div class="info-box-content">
+          <span class="info-box-text">
+            In: <span class="info-box-number2">{{ printmb .ovstats.BytesIn }} MB</span>
+          </span><br>
+          <span class="info-box-text">
+            Out: <span class="info-box-number2">{{ printmb .ovstats.BytesOut }} MB </span>
+          </span>
+        </div>
+      </div>
+      <div class="icon">
+        <i class="fa fa-group"></i>
+      </div>
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+      <div class="card-group" id="accordion">
+      </div>
+      <div id="collapseOne" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+        <div class="card-body text-center">
+          <span>Connected Clients and All traffic</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-success shadow">
+      <div class="inner">
+        <h3>Load Average<sup style="font-size: 20px"></sup></h3>
+        <div class="info-box-content">
+          <span class="info-box-text">
+            CPU count: <span class="info-box-number2">
+            {{ .sysinfo.CPUList.List | len }}
+            </span>
+          </span><br>
+          <span class="info-box-number">
+            1m: <b>{{ .sysinfo.LoadAvg.One }}</b> &nbsp; &nbsp;
+            5m: <b>{{ .sysinfo.LoadAvg.Five }}</b> &nbsp; &nbsp;
+            15m: <b>{{ .sysinfo.LoadAvg.Fifteen }}</b><br/>
+          </span>
+        </div>
+      </div>
+      <div class="icon">
+        <i class="ion ion-stats-bars"></i>
+      </div>
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        <div class="card-group" id="accordion">
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+          <div class="card-body text-center">
+            <span>Last one, five and ten minutes</span>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box shadow" style="background-color:#ffc107; color: white;">
+      <div class="inner">
+        <h3>OS uptime</h3>
+        <span class="info-box-number">{{ .sysinfo.UptimeS }}</span><br/><br/>
+      </div>
+      <div class="icon">
+        <i class="ion ion-arrow-graph-up-right"></i>
+      </div>
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        <div class="card-group" id="accordion">
+        </div>
+        <div id="collapseThree" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+          <div class="card-body text-center">
+            <span>How long your server is running</span>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box shadow" style="background-color: #e83e8c; color: white;">
+      <div class="inner">
+        <h3>Server Time</h3>
+        <span class="info-box-number">
+          {{ dateformat .sysinfo.CurrentTime "2006-01-02 15:04:05"}}
+        </span><br/><br/>
+      </div>
+      <div class="icon">
+        <i class="fa fa-clock-o"></i>
+      </div>
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        <div class="card-group" id="accordion">
+        </div>
+        <div id="collapseFour" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+          <div class="card-body text-center">
+            <span>Server time in it's local Time Zone</span>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<h3 class="mt-4 mb-2">Memory usage</h3>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="progress-group">
+          <span class="progress-number">
+            Memory <b>{{ printmb .sysinfo.Memory.Used }}</b>
+            /
+            {{ printmb .sysinfo.Memory.Total }} MB
+            - {{percent .sysinfo.Memory.Used .sysinfo.Memory.Total}}%
+          </span>
+          <div class="progress progress-xs">
+            <div class="progress-bar bg-primary progress-bar-striped"
+              style="width: {{percent .sysinfo.Memory.Used .sysinfo.Memory.Total}}%">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="progress-group">
+          <span class="progress-number">
+            Swap <b>{{ printmb .sysinfo.Swap.Used }}</b>
+            /
+            {{ printmb .sysinfo.Swap.Total }} MB
+            - {{percent .sysinfo.Swap.Used .sysinfo.Swap.Total}}%
+          </span>
+          <div class="progress progress-xs">
+            <div class="progress-bar bg-primary progress-bar-striped"
+              style="width: {{percent .sysinfo.Swap.Used .sysinfo.Swap.Total}}%">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-header with-border">
+        <h3 class="card-title">Connected clients</h3>
+      </div>
+      <!-- /.card-header -->
+
+      <div class="card-body">
+        {{if .ovstatus}}
+        <div class="table-responsive">
+          <table class="table no-margin">
+            <thead>
+            <tr>
+              <th>Common Name</th>
+              <th>Real Address</th>
+              <th>Virtual Address</th>
+              <th>KB Received</th>
+              <th>KB Sent</th>
+              <th>Connected Since</th>
+              <th>Username</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {{range .ovstatus.ClientList}}
+            <tr>
+                <td>{{.CommonName}}</td>
+                <td>{{.RealAddress}}</td>
+                <td>
+                  <span class="badge bg-success">{{.VirtualAddress}}</span>
+                  <button class="button-transparent button-copy" data-clipboard-text="{{.VirtualAddress}}">
+                      <img class="clippy" src="static/img/clippy.svg" width="13" alt="Copy to clipboard">
+                  </button>
+                </td>
+                <td align="right" style="padding-right:20px">
+                    {{printkb .BytesReceived}}
+                </td>
+                <td align="right" style="padding-right:20px">
+                    {{printkb .BytesSent}}
+                </td>
+                <td>{{.ConnectedSince}}</td>
+                <td>
+                  {{if eq .Username "UNDEF"}}
+                    -
+                  {{else}}
+                    {{.Username}}
+                  {{end}}
+                </td>
+                <td>
+                  <a href="javascript:$.MyAPP.Disconnect('{{.CommonName}}')"
+                    class="btn btn-xs btn-danger btn-flat"
+                    title="Disconnect">X</a>
+                </td>
+            </tr>
+            {{end}}
+
+            </tbody>
+          </table>
+        </div>
+        <!-- /.table-responsive -->
+      {{else}}
+          Fix your configuration
+      {{end}}
+      </div>
+
+      <!-- /.card-footer -->
+    </div>
+    <!-- /.card -->
+  </div>
+</div>
+<!-- /.col -->
+<!-- /.card-body -->
+
+
+<!--h3 class="mt-4 mb-2">Info Section</h3-->
+
+  <div class="row">
+    <div class="col-md-6 col-sm-12 col-12">
+      <div class="info-box">
+        <span class="info-box-icon bg-warning elevation-1 border-width: 3px;" style="padding: 10px; width: 100px; height: 100px;">
+          <img src="/static/img/openvpn-win.svg" alt="OpenVPN" width="74" height="74" style="filter: invert(25%);">
+        </span>
+          <!--i class="fa fa-info fa-2x"></i></span-->
+        <div class="info-box-content">
+          <span class="info-box-text">OpenVPN version:</span>
+          <span class="info-box-number3">{{ .ovversion }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-sm-12 col-12">
+      <div class="info-box">
+        <span class="info-box-icon bg-danger elevation-1 border-width: 3px;" style="padding: 10px; width: 100px; height: 100px;"><i class="fa fa-gears fa-2x"></i></span>
+        <div class="info-box-content">
+          <span class="info-box-text">Operating system:</span>
+          <span class="info-box-number3">{{ .sysinfo.Os }}</span>
+          <span class="info-box-text">Architecture: </span>
+          <span class="info-box-number3">{{ .sysinfo.Arch }} </span>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+  <!-- fix for small devices only -->
+  <div class="clearfix visible-sm-block"></div>
+  <!-- /.col -->
+</div>
+<!-- /.row -->
+
+{{end}}
+

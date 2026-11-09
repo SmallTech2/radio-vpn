@@ -1,0 +1,86 @@
+name: Radio VPN - Build and tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Go required by go.mod
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Validate shell scripts
+        run: |
+          set -euo pipefail
+          for script in Radio/*.sh Radio/scripts/*.sh; do bash -n "$script"; done
+      - name: Go tests and vet
+        env:
+          CGO_ENABLED: '1'
+        run: |
+          go test -mod=vendor ./...
+          go vet -mod=vendor ./...
+      - name: Compile Linux amd64
+        env:
+          CGO_ENABLED: '1'
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          go build -mod=vendor -trimpath -buildvcs=true -o dist/openvpn-ui .
+          file dist/openvpn-ui
+      - name: Test initialization for all three networks
+        env:
+          RADIO_TEST_BINARY: ${{ github.workspace }}/dist/openvpn-ui
+        run: python3 -B -m unittest discover -s test -p 'test_*.py' -v
+      - name: Test real Easy-RSA certificates and persistent revocation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends openvpn
+          curl --fail --location --proto '=https' --proto-redir '=https' \
+            https://github.com/OpenVPN/easy-rsa/archive/refs/tags/v3.2.2.tar.gz -o "$RUNNER_TEMP/easyrsa.tgz"
+          mkdir "$RUNNER_TEMP/easyrsa"
+          tar -xzf "$RUNNER_TEMP/easyrsa.tgz" -C "$RUNNER_TEMP/easyrsa" --strip-components=1
+          if ! EASYRSA_TEST_SOURCE="$RUNNER_TEMP/easyrsa/easyrsa3" python3 -B test/test_pki.py -v > "$RUNNER_TEMP/radio-pki.log" 2>&1; then
+            cat "$RUNNER_TEMP/radio-pki.log"
+            python3 -c 'import pathlib,sys; message=pathlib.Path(sys.argv[1]).read_text()[-6000:]; print("::error title=PKI lifecycle::"+message.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))' "$RUNNER_TEMP/radio-pki.log"
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/radio-pki.log"
+      - name: Package runtime and verify checksums
+        run: |
+          bash Radio/package-release.sh dist/openvpn-ui
+          (cd dist; sha256sum -c radio-openvpn-ui-linux-amd64.zip.sha256)
+          mkdir "$RUNNER_TEMP/radio-package"
+          unzip -q dist/radio-openvpn-ui-linux-amd64.zip -d "$RUNNER_TEMP/radio-package"
+          (cd "$RUNNER_TEMP/radio-package"; sha256sum -c SHA256SUMS)
+          cp "$RUNNER_TEMP/radio-package/openvpn-ui.sha256" dist/
+          cp "$RUNNER_TEMP/radio-package/source-commit.txt" dist/
+          cp "$RUNNER_TEMP/radio-package/deployment-source-commit.txt" dist/
+      - name: Publish build artifact for validation
+        uses: actions/upload-artifact@v4
+        with:
+          name: radio-openvpn-ui-linux-amd64
+          path: |
+            dist/radio-openvpn-ui-linux-amd64.zip
+            dist/radio-openvpn-ui-linux-amd64.zip.sha256
+            dist/openvpn-ui
+            dist/openvpn-ui.sha256
+            dist/source-commit.txt
+            dist/deployment-source-commit.txt
+          if-no-files-found: error
+          retention-days: 30
