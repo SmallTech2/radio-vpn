@@ -4,14 +4,19 @@
 
 ## Présentation
 
-Radio VPN installe OpenVPN Community Edition et OpenVPN UI sur un VPS **Debian 13 AMD64**,
-avec Easy-RSA, systemd et nftables, sans Docker ni compilation sur le serveur.
-Les clients connectés **peuvent communiquer entre eux par leurs adresses VPN privées fixes**,
-sous réserve de leurs pare-feu locaux. Ils conservent leur connexion Internet habituelle.
+Radio VPN automatise le déploiement d’OpenVPN Community Edition et d’OpenVPN UI sur un
+VPS **Debian 13 AMD64**, sans Docker ni compilation sur le serveur. L’interface Web
+permet de créer les clients, de leur attribuer une adresse VPN fixe et de gérer leurs
+certificats, leur renouvellement et leur révocation. Les équipements connectés
+**peuvent communiquer entre eux par leurs adresses VPN privées**, sous réserve de leurs
+pare-feu locaux, tout en conservant leur connexion Internet habituelle.
 
-L’installation comprend un compte administrateur Linux choisi par l’utilisateur, SSH par
-clé, les profils `tls-crypt`, le renouvellement de la CRL, la configuration du clavier
-console, la désactivation persistante d’IPv6 et la gestion automatique des logs.
+L’installation sécurise les accès avec SSH par clé, nftables et les profils `tls-crypt` ;
+l’interface Web est accessible par VPN ou tunnel SSH. Elle configure aussi le renouvellement
+de la CRL, le clavier console, la désactivation persistante d’IPv6 et la gestion des logs.
+Les projets complémentaires [radio-vpn-backup](https://github.com/SmallTech2/radio-vpn-backup)
+et [radio-vpn-restore](https://github.com/SmallTech2/radio-vpn-restore) permettent de
+sauvegarder les données puis de reconstruire le serveur en conservant les certificats clients.
 Voir le [périmètre de compatibilité](docs/ecosystem.md#périmètre-de-compatibilité).
 
 Solution validée le 12 novembre 2026 sur Debian 13.7.
