@@ -13,9 +13,17 @@ Solution validée le 12 novembre 2026 sur Debian 13.7.
 | --- | --- |
 | Installer un serveur Debian 13 AMD64 vierge | [radio-vpn — installation](installation.md) |
 | Gérer les clients, les IP fixes et les révocations | [radio-vpn — administration](administration.md) |
-| Préparer les archives et les collecter avec Synology ABB | [radio-vpn-backup — ABB](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/abb.md) |
+| Installer la préparation des sauvegardes sur le VPS | [radio-vpn-backup — installation VPS](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/vps-installation.md) |
+| Configurer ensuite la collecte avec Synology ABB | [radio-vpn-backup — ABB](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/abb.md#5-configurer-abb) |
 | Collecter sans ABB | [radio-vpn-backup — collecteur personnalisé](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/installation.md) |
 | Reconstruire après perte du VPS en conservant les certificats | [radio-vpn-restore — restauration](https://github.com/SmallTech2/radio-vpn-restore/blob/main/docs/restoration.md) |
+
+Commencer par installer radio-vpn-backup sur le VPS, puis choisir une seule méthode
+de collecte NAS : ABB ou le collecteur personnalisé. Après une reconstruction et une
+restauration avec radio-vpn-restore, cette installation est également nécessaire :
+la restauration ne réinstalle pas le programme de sauvegarde, son compte de collecte,
+sa configuration ou son cron. Une tâche NAS existante doit ensuite être vérifiée,
+notamment l’empreinte SSH du VPS reconstruit.
 
 ## Rôles et dépendances
 
