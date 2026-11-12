@@ -1,5 +1,8 @@
 # Radio VPN — OpenVPN natif sur Debian 13
 
+🌐 **Translate to English** — Pour consulter cette page en anglais, utilisez la fonction
+de traduction intégrée de votre navigateur. Copiez les commandes depuis l’original français.
+
 Radio VPN installe OpenVPN Community Edition et OpenVPN UI sur un VPS **Debian 13
 AMD64**, avec Easy-RSA, systemd et nftables, sans Docker ni compilation sur le serveur.
 Il relie des équipements distants dans un réseau privé IPv4 à adresses fixes, sans
