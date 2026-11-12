@@ -2,79 +2,75 @@
 
 Radio VPN installe OpenVPN Community Edition et OpenVPN UI sur un VPS **Debian 13
 AMD64**, avec Easy-RSA, systemd et nftables, sans Docker ni compilation sur le serveur.
+Il relie des équipements distants dans un réseau privé IPv4 à adresses fixes, sans
+remplacer leur connexion Internet habituelle.
 
-Projet dérivé de [d3vilh/openvpn-ui](https://github.com/d3vilh/openvpn-ui), distribué
-par Radio Bonheur sous [licence MIT](LICENSE). Les copyrights et attributions
-d'Adam Wałach et de Mr. Philipp (d3vilh) sont conservés.
+Solution validée le 12 novembre 2026 sur Debian 13.7.
 
-## Objectif et résultat de l'installation
+## Écosystème Radio VPN
 
-Relier des postes ou équipements distants dans un réseau privé IPv4 à adresses fixes,
-administré depuis une interface Web. Les clients communiquent entre eux avec
-`client-to-client` et conservent leur connexion Internet habituelle.
+Ce dépôt est le point d’entrée des trois projets :
 
-Après une installation réussie, le serveur dispose :
+| Projet | Fonction | Procédure |
+| --- | --- | --- |
+| [radio-vpn](https://github.com/SmallTech2/radio-vpn) | Installer le serveur de référence | [Installation](docs/installation.md) |
+| [radio-vpn-backup](https://github.com/SmallTech2/radio-vpn-backup) | Préparer et collecter ses sauvegardes | [Sauvegarde avec Synology ABB](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/abb.md) |
+| [radio-vpn-restore](https://github.com/SmallTech2/radio-vpn-restore) | Restaurer sur un serveur reconstruit avec radio-vpn | [Restauration](https://github.com/SmallTech2/radio-vpn-restore/blob/main/docs/restoration.md) |
 
-- D'un compte administrateur Linux choisi par l'utilisateur, avec sudo et accès SSH par clé ED25519 vérifié.
-- D'OpenVPN et d'OpenVPN UI démarrés et gérés par systemd.
-- D'une PKI Easy-RSA unique, du certificat serveur et d'un renouvellement automatique de la CRL.
-- D'un pare-feu nftables : SSH et UDP 1194 accessibles publiquement ; interface Web accessible par VPN ou tunnel SSH.
-- D'IPv6 désactivé de façon persistante, après validation de l'accès SSH en IPv4.
-- Des composants du clavier console Debian et de l'application de la disposition configurée avec `setupcon --force`.
-- D'une [gestion automatique des logs](docs/maintenance.md#gestion-automatique-des-logs) : rotation OpenVPN et limites journald.
+**Installation → sauvegarde → reconstruction → restauration.** La
+[présentation de l’écosystème](docs/ecosystem.md) précise les dépendances et le périmètre
+commun. Une installation OpenVPN ou une sauvegarde provenant d’un autre outil n’est
+pas garantie compatible ; cela ne constitue pas une impossibilité technique absolue.
 
-Créez ensuite les clients dans l'interface, attribuez leurs IP fixes et téléchargez
-leurs profils `.ovpn` avec `tls-crypt`. L'ajout d'un client ne redémarre pas OpenVPN.
-La liste principale masque les certificats révoqués sans effacer leur révocation.
-Le serveur n'est pas configuré comme passerelle Internet pour les clients.
+## Résultat de l’installation
+
+- Compte administrateur Linux choisi par l’utilisateur, sudo et SSH par clé ED25519.
+- OpenVPN et OpenVPN UI gérés par systemd ; interface accessible par VPN ou tunnel SSH.
+- PKI Easy-RSA unique, profils clients avec `tls-crypt`, IP fixes et renouvellement automatique de la CRL.
+- nftables : SSH et UDP 1194 accessibles publiquement ; TCP 8080 protégé.
+- Désactivation persistante d’IPv6 après vérification de l’accès SSH en IPv4.
+- Configuration du clavier console et [gestion automatique des logs](docs/maintenance.md#gestion-automatique-des-logs).
+
+Le serveur utilise la première adresse du réseau privé choisi, de `/16` à `/29`.
+Les clients communiquent par `client-to-client`. Le serveur n’est pas une passerelle Internet.
+L’ajout d’un client dans l’UI ne redémarre pas OpenVPN. La révocation reste dans la PKI,
+même lorsque le certificat est masqué dans la liste principale.
 
 ## Version stable et démarrage rapide
 
-Version publiée : **[radio-v2.4](https://github.com/SmallTech2/radio-vpn/releases/tag/radio-v2.4)**.
-Les scripts, le binaire Linux AMD64 et les ressources sont associés au même commit.
-Les empreintes SHA-256 sont fournies avec les fichiers de la Release.
+Version publiée : **[radio-v2.4](https://github.com/SmallTech2/radio-vpn/releases/tag/radio-v2.4)**,
+avec paquet Linux AMD64, binaire, références des sources et empreintes SHA-256.
 
-Prévoyez un VPS vierge Debian 13 AMD64, une IPv4 publique fixe, un accès SSH en IPv4
-avec droits root/sudo et la clé publique ED25519 du poste administrateur.
-Le pare-feu de l'hébergeur doit autoriser le port SSH utilisé et UDP 1194.
+Sur un **VPS vierge Debian 13 AMD64**, avec une IPv4 publique et les droits sudo :
 
 ```bash
 sudo apt update
 sudo apt install -y curl
+cd "$HOME"
 curl --fail --location --proto '=https' --proto-redir '=https' \
   https://raw.githubusercontent.com/SmallTech2/radio-vpn/radio-v2.4/Radio/deploy-vps.sh \
   -o deploy-vps.sh
 sudo bash deploy-vps.sh
 ```
 
-Avec une session `root`, omettez `sudo`. Gardez le fichier téléchargé dans le même
-répertoire : après la préparation Debian et le redémarrage, reconnectez-vous en IPv4
-et relancez `sudo bash deploy-vps.sh`. La reprise est manuelle.
+En session root, omettre `sudo`. Autoriser le port SSH utilisé et UDP 1194 chez l’hébergeur.
+Après la préparation Debian et le redémarrage, se reconnecter en IPv4 puis relancer le
+même fichier avec `sudo bash deploy-vps.sh`. La reprise est manuelle.
 
-L'installateur demande les paramètres du réseau, l'identité PKI, le nom du compte
-Linux et les mots de passe. Une nouvelle connexion SSH par clé doit être ouverte et
-confirmée ; sa preuve est vérifiée automatiquement dans le journal avant durcissement.
+L’installateur demande l’IP publique, le réseau privé, le compte Linux, sa clé publique,
+l’identité PKI et les mots de passe. Garder la session ouverte et établir la nouvelle
+connexion par clé demandée avant le durcissement SSH. Il refuse une installation ou
+une PKI existante : utiliser radio-vpn-restore pour rétablir les identités sauvegardées.
 
-Consultez les guides : [installation](docs/installation.md),
-[administration](docs/administration.md), [sécurité](docs/security.md) et
-[maintenance](docs/maintenance.md). `Radio/` contient les scripts et modèles du déploiement.
+## Guides
 
-## Périmètre et vérifications
-
-Le déploiement cible un serveur IPv4 AMD64 et un réseau privé RFC1918 de `/16` à `/29`.
-L'adresse du serveur est la première adresse utilisable du réseau choisi. Les clients
-utilisent des adresses fixes. L'installateur refuse de remplacer une installation ou
-une PKI existante.
-
-Les tests automatisés contrôlent la syntaxe Bash, le code Go, l'initialisation SQLite,
-les profils clients, la PKI et la CRL, ainsi que les parcours SSH et IPv6 simulés.
-Ils ne constituent pas une validation complète sur VPS réel, notamment après redémarrage.
-Le contrôle réel porte aussi sur le clavier de la console, les accès SSH et Web, le
-filtrage réseau, la communication entre clients et la persistance de la révocation.
-Les paquets système sont fournis par les miroirs Debian.
+[Installation](docs/installation.md) · [Administration](docs/administration.md) ·
+[Sécurité](docs/security.md) · [Maintenance et mises à jour](docs/maintenance.md) ·
+[Écosystème](docs/ecosystem.md).
 
 ## Licence et crédits
 
-La [licence MIT](LICENSE), les copyrights et les attributions du projet d'origine
-s'appliquent. Les licences des dépendances sont conservées dans `vendor/` ; leurs
-versions sont décrites par `go.mod` et `go.sum`.
+Projet dérivé de [d3vilh/openvpn-ui](https://github.com/d3vilh/openvpn-ui), distribué
+par Radio Bonheur sous [licence MIT](LICENSE). Les copyrights et attributions d’Adam
+Wałach et de Mr. Philipp (d3vilh) sont conservés. Les licences des dépendances restent
+dans `vendor/`, avec leurs versions dans `go.mod` et `go.sum`.

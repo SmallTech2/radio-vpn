@@ -23,7 +23,7 @@ système peuvent encore occuper de l'espace. Surveillez donc aussi l'espace disq
 
 Commandes de contrôle (le mode `--debug` ne déclenche aucune rotation) :
 
-```sh
+```bash
 sudo logrotate --debug /etc/logrotate.d/openvpn
 systemctl list-timers --all logrotate.timer
 systemctl --no-pager status logrotate.timer
@@ -70,7 +70,7 @@ OpenVPN et OpenVPN UI ne sont pas interrompus.
 
 Commandes de contrôle et de renouvellement :
 
-```sh
+```bash
 sudo openssl crl -in /etc/openvpn/pki/crl.pem -noout -lastupdate -nextupdate
 sudo openssl crl -in /etc/openvpn/pki/crl.pem -noout -text
 sudo systemctl start radio-renew-crl.service
@@ -105,7 +105,7 @@ Ne pas utiliser les commandes de suppression de PKI de la GUI pour retirer un se
 `radio-renew-crl.service` régénère la CRL et `radio-renew-crl.timer` planifie cette opération.
 ## Diagnostic
 
-```sh
+```bash
 systemctl --no-pager status openvpn@server openvpn-ui nftables radio-renew-crl.timer
 sudo journalctl -u openvpn@server -u openvpn-ui -n 100 --no-pager
 sudo tail -n 100 /var/log/openvpn/openvpn.log
@@ -120,16 +120,33 @@ sudo cat /etc/radio-vpn-deployed
 ## Reconstruire un serveur
 
 
-Conserver le dépôt et les fichiers de la Release, noter l'IPv4, le réseau, l'identité PKI
-et la clé publique SSH à utiliser. Installer un **nouveau Debian 13 vierge**, puis suivre
-la [procédure d’installation](installation.md) avec la référence publiée indiquée dans le README principal, y compris la relance après la mise à niveau et le redémarrage.
-Une reconstruction vierge génère une nouvelle CA : recréer les clients et redistribuer
-les profils. Elle ne restaure pas les identités existantes.
+Pour conserver les identités existantes, utiliser une archive de
+[radio-vpn-backup](https://github.com/SmallTech2/radio-vpn-backup), reconstruire le serveur
+avec radio-vpn puis suivre la [procédure radio-vpn-restore](https://github.com/SmallTech2/radio-vpn-restore/blob/main/docs/restoration.md).
+Le réseau VPN de destination doit correspondre à celui de la sauvegarde. Les accès SSH
+et le pare-feu du nouveau serveur sont conservés ; la PKI provisoire est remplacée par
+la PKI sauvegardée. Ne pas recréer les certificats clients pour cette opération.
 
-La conservation des anciennes identités exige une sauvegarde confidentielle de la PKI,
-de la base et des fichiers d'exploitation. Ces données ne doivent jamais être publiées
-sur GitHub. La copie locale du dépôt et des Releases n'inclut pas la PKI du VPS.
-Aucun système supplémentaire de sauvegarde VPS n'est installé par ce projet.
+Sans sauvegarde de la PKI et des données UI, une installation vierge ne récupère pas
+les identités précédentes : il faut créer et distribuer de nouveaux profils. La copie
+locale du dépôt et les assets GitHub ne contiennent pas la PKI d’exploitation.
+Aucun système de sauvegarde VPS n’est installé par radio-vpn seul.
+
+## Mises à jour
+
+Les mises à jour Debian relèvent de l’administration du VPS. Garder une session SSH
+ouverte et une sauvegarde récente avant une intervention :
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+Ces commandes peuvent demander des décisions ou un redémarrage ; suivre leurs messages.
+Pour l’application, consulter la Release et sa notice avant toute substitution. Il
+n’existe pas de commande de mise à jour applicative en place fournie par l’installateur.
+Ne pas le relancer sur une PKI existante pour mettre le serveur à jour. Modifier le
+clone Git ne modifie ni le binaire ni les fichiers déjà installés sur le VPS.
 
 ## Maintenance et fichiers de référence
 

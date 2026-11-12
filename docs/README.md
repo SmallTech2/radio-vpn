@@ -6,6 +6,7 @@ Le guide d'installation reprend sa commande de téléchargement figée.
 
 ## Guides utilisateur
 
+- [Écosystème](ecosystem.md) : rôles des trois projets et parcours de reconstruction.
 - [Installation](installation.md) : prérequis, téléchargement publié, redémarrage et paramètres.
 - [Administration](administration.md) : interface Web, tunnel SSH, clients à IP fixes et révocation.
 - [Sécurité](security.md) : filtrage entrant nftables, durcissement SSH et accès à l’interface par tunnel SSH ou depuis le VPN.
@@ -17,5 +18,7 @@ Le guide d'installation reprend sa commande de téléchargement figée.
 - [Scripts](../Radio/scripts/README.md).
 - [Modèles de configuration](../Radio/config/README.md).
 
-Les scripts et configurations restent dans `Radio/`. Le dossier `test/` contient
-uniquement les tests ; les notices des dépendances restent dans `vendor/`.
+- [Suivi technique de maintenance](VALIDATION.md).
+
+Les scripts et configurations restent dans `Radio/` ; les notices des dépendances
+restent dans `vendor/`.

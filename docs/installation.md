@@ -61,7 +61,7 @@ Au premier lancement, une confirmation précède `apt-get update`, `apt-get full
 (en conservant les fichiers de configuration locaux) et `apt-get autoremove --purge`.
 Le VPS redémarre ensuite. Après reconnexion SSH, relancer dans le même répertoire :
 
-```sh
+```bash
 sudo bash deploy-vps.sh
 ```
 

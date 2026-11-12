@@ -14,7 +14,7 @@ Ne copiez jamais votre clé privée sur le serveur.
 Gardez la session d'installation ouverte. Depuis un autre terminal de votre poste,
 ouvrez une nouvelle connexion avec le compte créé et la clé fournie :
 
-```sh
+```bash
 ssh -4 -o ControlMaster=no -o ControlPath=none -o PreferredAuthentications=publickey \
   -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no \
   UTILISATEUR_LINUX@IP_PUBLIQUE_DU_SERVEUR
@@ -40,7 +40,7 @@ format des messages OpenSSH. Si le journal est inaccessible, incomplet ou ne con
 pas la preuve attendue, la validation échoue sans désactiver les accès existants.
 Une connexion multiplexée ne crée pas nécessairement une nouvelle authentification :
 utilisez la commande ci-dessus. Le journal prouve une authentification réussie, pas
-que la session restera ouverte ; conservez-la et testez encore l'accès après durcissement.
+que la session restera ouverte ; conservez-la et vérifiez encore l’accès après durcissement.
 L'adresse locale et le port utilisés pour `sshd -T` sont ceux de la session d'installation
 (à défaut, l'adresse publique et le port SSH effectif). Ce parcours suppose que la
 nouvelle connexion utilise ce même point d'entrée SSH.
@@ -50,7 +50,7 @@ nouvelle connexion utilise ce même point d'entrée SSH.
 Ne vous fiez pas uniquement au contenu d'un fichier : les inclusions et les règles
 `Match` peuvent changer la configuration effective. Dans la session SSH concernée :
 
-```sh
+```bash
 sudo /usr/sbin/sshd -t
 read -r CLIENT_IP CLIENT_PORT SERVER_IP SERVER_PORT <<< "$SSH_CONNECTION"
 sudo /usr/sbin/sshd -T -C "user=$(id -un),addr=$CLIENT_IP,host=$CLIENT_IP,laddr=$SERVER_IP,lport=$SERVER_PORT" \
@@ -152,7 +152,7 @@ La chaîne nftables `forward` utilise une politique `accept`. L'installateur ne 
 pas le routage IPv4 du noyau. Pour un serveur sans rôle de routeur entre interfaces,
 vérifiez que `net.ipv4.ip_forward` vaut `0` :
 
-```sh
+```bash
 sysctl net.ipv4.ip_forward
 ```
 
@@ -170,7 +170,7 @@ Cette méthode ne nécessite **aucune connexion OpenVPN** : seule une connexion 
 à l'IPv4 publique du VPS est nécessaire. Depuis votre poste, remplacez le chemin de clé,
 le nom d'utilisateur et l'adresse publique dans cet exemple générique :
 
-```sh
+```bash
 ssh -N -T -i "/chemin/vers/cle_privee" \
   -L 127.0.0.1:8083:127.0.0.1:8080 \
   utilisateur@IP_PUBLIQUE_DU_VPS
