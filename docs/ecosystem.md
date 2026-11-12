@@ -1,5 +1,7 @@
 # Écosystème Radio VPN
 
+[Accueil et installation](../README.md#installer-le-serveur-vpn) · [Tous les guides](README.md)
+
 Trois dépôts distincts assurent le cycle de vie du serveur :
 
 **Installation avec radio-vpn → sauvegarde avec radio-vpn-backup → reconstruction avec
@@ -12,7 +14,7 @@ Solution validée le 12 novembre 2026 sur Debian 13.7.
 | Besoin | Projet et guide |
 | --- | --- |
 | Installer un serveur Debian 13 AMD64 vierge | [radio-vpn — installation](installation.md) |
-| Gérer les clients, les IP fixes et les révocations | [radio-vpn — administration](administration.md) |
+| Faire communiquer les clients VPN, gérer leurs IP fixes et révocations | [radio-vpn — administration](administration.md) |
 | Installer la préparation des sauvegardes sur le VPS | [radio-vpn-backup — installation VPS](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/vps-installation.md) |
 | Configurer ensuite la collecte avec Synology ABB | [radio-vpn-backup — ABB](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/abb.md#5-configurer-abb) |
 | Collecter sans ABB | [radio-vpn-backup — collecteur personnalisé](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/installation.md) |
@@ -29,7 +31,9 @@ notamment l’empreinte SSH du VPS reconstruit.
 
 **radio-vpn** fournit le socle : services, arborescences, PKI, base OpenVPN UI et
 protection réseau. Une installation vierge crée une PKI initiale ; elle ne récupère
-pas les identités d’un ancien serveur.
+pas les identités d’un ancien serveur. Les équipements connectés peuvent communiquer
+entre eux par leurs adresses VPN avec `client-to-client`, sous réserve de leurs
+pare-feu locaux : voir [clients et communication](administration.md#clients-ip-fixes-et-communication).
 
 **radio-vpn-backup** prépare sur ce socle une archive confidentielle cohérente avec
 la PKI, la CRL, les profils, les adresses fixes et la base UI. Le VPS prépare l’archive

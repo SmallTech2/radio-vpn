@@ -1,6 +1,21 @@
 # Sécurité
 
+[Accueil et installation](../README.md#installer-le-serveur-vpn) · [Tous les guides](README.md) · [Écosystème](ecosystem.md)
+
 Utilisez la référence publiée indiquée dans le [README principal](../README.md#version-stable-et-démarrage-rapide).
+**Dans cette page**
+
+- [Compte administrateur et SSH](#compte-administrateur-et-ssh)
+- [Vérifier l'accès par clé](#vérifier-laccès-par-clé)
+- [Vérifier le durcissement effectif](#vérifier-le-durcissement-effectif)
+- [Console VNC ou console de secours](#console-vnc-ou-console-de-secours)
+- [Désactivation IPv6](#désactivation-ipv6)
+- [Filtrage entrant avec nftables](#filtrage-entrant-avec-nftables)
+- [Routage du noyau et communication interclients](#routage-du-noyau-et-communication-interclients)
+- [Accès à OpenVPN UI par tunnel SSH](#accès-à-openvpn-ui-par-tunnel-ssh)
+- [Accès à OpenVPN UI depuis le VPN](#accès-à-openvpn-ui-depuis-le-vpn)
+- [Protection pendant l'installation](#protection-pendant-linstallation)
+
 ## Compte administrateur et SSH
 
 Utilisez le compte Linux choisi pendant l'installation et indiqué dans son récapitulatif.

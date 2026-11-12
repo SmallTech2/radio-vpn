@@ -1,5 +1,7 @@
 # Maintenance
 
+[Accueil et installation](../README.md#installer-le-serveur-vpn) · [Tous les guides](README.md) · [Écosystème](ecosystem.md)
+
 Les commandes ci-dessous concernent un serveur déjà installé.
 
 ## Gestion automatique des logs
@@ -130,7 +132,10 @@ la PKI sauvegardée. Ne pas recréer les certificats clients pour cette opérati
 Sans sauvegarde de la PKI et des données UI, une installation vierge ne récupère pas
 les identités précédentes : il faut créer et distribuer de nouveaux profils. La copie
 locale du dépôt et les assets GitHub ne contiennent pas la PKI d’exploitation.
-Aucun système de sauvegarde VPS n’est installé par radio-vpn seul.
+Aucun système de sauvegarde VPS n’est installé par radio-vpn seul. Commencer par
+[l’installation de radio-vpn-backup sur le VPS](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/vps-installation.md),
+puis choisir la collecte [ABB](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/abb.md#5-configurer-abb)
+ou [personnalisée](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/installation.md).
 
 ## Mises à jour
 

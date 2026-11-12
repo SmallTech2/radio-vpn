@@ -1,5 +1,7 @@
 # Administration
 
+[Accueil et installation](../README.md#installer-le-serveur-vpn) · [Tous les guides](README.md) · [Écosystème](ecosystem.md)
+
 Ce guide décrit l'utilisation d'un serveur installé depuis la référence publiée indiquée
 dans le [README principal](../README.md#version-stable-et-démarrage-rapide). Les exemples de réseaux sont fictifs.
 Remplacez `UTILISATEUR_LINUX` par le compte créé par l'installateur.
@@ -28,7 +30,8 @@ Les fichiers CCD de `/etc/openvpn/staticclients` portent les IP fixes avec le bo
 `ifconfig-pool-persist`. `client-to-client` permet la communication entre clients.
 Aucun `redirect-gateway` n'est poussé : les clients conservent leur Internet habituel.
 
-Le pare-feu local de chaque client doit autoriser le trafic VPN souhaité. Vérifiez la connexion
+**Les équipements connectés au VPN peuvent communiquer entre eux par leurs adresses
+VPN privées.** Le pare-feu local de chaque client doit autoriser le trafic VPN souhaité. Vérifiez la connexion
 simultanée de deux clients, leur interconnexion et leur reconnexion après redémarrage.
 
 ## Révocation, suppression et renouvellement des clients

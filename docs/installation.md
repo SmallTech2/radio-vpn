@@ -1,6 +1,16 @@
 # Installation
 
+[Accueil et installation](../README.md#installer-le-serveur-vpn) · [Tous les guides](README.md) · [Écosystème](ecosystem.md)
+
 Les exemples de réseaux sont fictifs. Adaptez-les à votre installation.
+
+**Dans cette page**
+
+- [Prérequis](#prérequis)
+- [Préparer le téléchargement](#préparer-le-téléchargement)
+- [Télécharger et lancer l'installateur stable](#télécharger-et-lancer-linstallateur-stable)
+- [Préparation Debian et paramètres interactifs](#préparation-debian-et-paramètres-interactifs)
+- [Après l’installation](#après-linstallation)
 
 ## Prérequis
 
@@ -114,5 +124,10 @@ utilise les sources de déploiement du commit inscrit dans ce paquet.
 Conservez la référence figée fournie dans le README principal, sans la remplacer par une
 branche de développement ou par un lien mouvant de type « latest ».
 
-Après installation : [administration](administration.md), [sécurité SSH](security.md)
-et [maintenance](maintenance.md).
+## Après l’installation
+
+1. [Accéder à OpenVPN UI](administration.md#accès-à-openvpn-ui), puis [créer les clients à IP fixe et vérifier leur communication](administration.md#clients-ip-fixes-et-communication).
+2. [Installer radio-vpn-backup sur le VPS](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/vps-installation.md), puis choisir la collecte [ABB](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/abb.md#5-configurer-abb) ou [personnalisée](https://github.com/SmallTech2/radio-vpn-backup/blob/main/docs/installation.md).
+3. Suivre la [maintenance](maintenance.md) et les [contrôles de sécurité](security.md).
+
+Pour une reconstruction avec sauvegarde, poursuivre avec la [restauration](https://github.com/SmallTech2/radio-vpn-restore/blob/main/docs/restoration.md), avant de créer de nouveaux clients.
