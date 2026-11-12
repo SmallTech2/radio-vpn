@@ -1,8 +1,8 @@
-name: Radio VPN - Publish radio-v2.4
+name: Radio VPN - Publish v1.0.0
 
 on:
   push:
-    tags: [radio-v2.4]
+    tags: [v1.0.0]
 
 permissions:
   contents: read
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout exact stable tag
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: refs/tags/radio-v2.4
+          ref: refs/tags/v1.0.0
           persist-credentials: false
       - name: Retrieve successful build of this exact commit
         env:
@@ -26,6 +26,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          VERSION=$(cat VERSION)
+          [[ "$VERSION" == "$GITHUB_REF_NAME" && "$VERSION" == v1.0.0 ]]
           SOURCE_COMMIT=$(git rev-parse HEAD)
           [[ "$SOURCE_COMMIT" == "$GITHUB_SHA" ]]
           RUN_ID=$(gh api "repos/$GH_REPO/actions/workflows/radio-build.yml/runs?head_sha=$SOURCE_COMMIT&event=push&status=success&per_page=5" --jq '.workflow_runs[0].id')
@@ -34,10 +36,10 @@ jobs:
           [[ "$(cat dist/source-commit.txt)" == "$SOURCE_COMMIT" ]]
           [[ "$(cat dist/deployment-source-commit.txt)" == "$SOURCE_COMMIT" ]]
           (cd dist; sha256sum -c openvpn-ui.sha256; sha256sum -c radio-openvpn-ui-linux-amd64.zip.sha256)
-          mkdir "$RUNNER_TEMP/radio-v2.4"
-          unzip -q dist/radio-openvpn-ui-linux-amd64.zip -d "$RUNNER_TEMP/radio-v2.4"
-          (cd "$RUNNER_TEMP/radio-v2.4"; sha256sum -c SHA256SUMS)
-          cmp dist/openvpn-ui "$RUNNER_TEMP/radio-v2.4/openvpn-ui"
+          mkdir "$RUNNER_TEMP/v1.0.0"
+          unzip -q dist/radio-openvpn-ui-linux-amd64.zip -d "$RUNNER_TEMP/v1.0.0"
+          (cd "$RUNNER_TEMP/v1.0.0"; sha256sum -c SHA256SUMS)
+          cmp dist/openvpn-ui "$RUNNER_TEMP/v1.0.0/openvpn-ui"
           python3 - "$SOURCE_COMMIT" <<'PY'
           import pathlib, subprocess, sys, zipfile
           commit = sys.argv[1]
@@ -45,17 +47,47 @@ jobs:
               for name in ('source-commit.txt', 'deployment-source-commit.txt'):
                   assert archive.read(name).decode().strip() == commit
               assert ('vcs.revision=' + commit).encode() in archive.read('openvpn-ui')
-              names = subprocess.check_output(['git', 'ls-files', 'Radio', 'docs', 'README.md', 'LICENSE', 'static', 'views', 'swagger']).decode().splitlines()
+              names = subprocess.check_output(['git', 'ls-files', 'Radio', 'docs', 'README.md', 'LICENSE', 'VERSION', 'static', 'views', 'swagger']).decode().splitlines()
               for name in names:
                   assert archive.read(name) == pathlib.Path(name).read_bytes(), name
           PY
-          printf 'Radio VPN : OpenVPN et OpenVPN UI natifs sur Debian 13 AMD64.\n\nRotation quotidienne du journal OpenVPN : 7 archives compressees avec copytruncate, sans redemarrer OpenVPN. Limites journald : 200M persistants et 50M volatils.\n\nAucune reinstallation des VPS existants n est necessaire : appliquer la procedure du guide docs/maintenance.md. La rotation quotidienne ne plafonne pas la taille du journal ; copytruncate presente un faible risque de perte de lignes pendant la rotation.\n\nCommit : %s\nTests et compilation : https://github.com/%s/actions/runs/%s\n\nLes controles automatises ne constituent pas une validation sur VPS reel, notamment apres redemarrage.\n' "$SOURCE_COMMIT" "$GH_REPO" "$RUN_ID" > "$RUNNER_TEMP/radio-v2.4-notes.md"
-      - name: Publish radio-v2.4 from verified artifact
+          cat > "$RUNNER_TEMP/v1.0.0-notes.md" <<'NOTES'
+          Déploiement automatisé d’OpenVPN et OpenVPN UI natifs sous Debian 13 AMD64 : clients à IP fixes, communication entre clients, certificats et révocations, SSH par clé, nftables, désactivation IPv6 et gestion automatique des logs.
+
+          Distribution officielle commune : compatible avec [radio-vpn-backup v1.0.0](https://github.com/SmallTech2/radio-vpn-backup/releases/tag/v1.0.0) et [radio-vpn-restore v1.0.0](https://github.com/SmallTech2/radio-vpn-restore/releases/tag/v1.0.0). La compatibilité avec toutes les versions historiques n’est pas garantie.
+
+          Le paquet Linux AMD64 contient le binaire, les ressources, l’installateur, les scripts auxiliaires, les modèles, les guides et VERSION. Les fichiers SHA-256 et les références des commits sources accompagnent les assets.
+
+          Solution validée le 12 novembre 2026 sur Debian 13.7. Les vérifications automatisées de cette publication ne constituent pas une nouvelle recette sur VPS.
+          NOTES
+          printf '\nCommit source : `%s`\nTests et compilation : https://github.com/%s/actions/runs/%s\n' "$SOURCE_COMMIT" "$GH_REPO" "$RUN_ID" >> "$RUNNER_TEMP/v1.0.0-notes.md"
+      - name: Publish v1.0.0 from verified artifact
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release create radio-v2.4 --verify-tag --latest --target "$GITHUB_SHA" \
-            --title 'Radio VPN - radio-v2.4' --notes-file "$RUNNER_TEMP/radio-v2.4-notes.md" \
+          gh release create v1.0.0 --verify-tag --latest --target "$GITHUB_SHA" \
+            --title 'Radio VPN - v1.0.0' --notes-file "$RUNNER_TEMP/v1.0.0-notes.md" \
             dist/radio-openvpn-ui-linux-amd64.zip dist/radio-openvpn-ui-linux-amd64.zip.sha256 \
             dist/openvpn-ui dist/openvpn-ui.sha256 dist/source-commit.txt dist/deployment-source-commit.txt
+
+      - name: Verify the three official releases before removing obsolete publications
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for repo in radio-vpn radio-vpn-backup radio-vpn-restore; do
+            gh api "repos/SmallTech2/$repo/releases/tags/v1.0.0" \
+              --jq 'select(.draft == false and .prerelease == false) | .tag_name' | grep -Fx v1.0.0
+            [[ "$(gh api "repos/SmallTech2/$repo/contents/VERSION?ref=v1.0.0" --jq .content | base64 --decode)" == v1.0.0 ]]
+          done
+          gh release download v1.0.0 --repo "$GH_REPO" --dir "$RUNNER_TEMP/published"
+          (cd "$RUNNER_TEMP/published"; sha256sum -c openvpn-ui.sha256; sha256sum -c radio-openvpn-ui-linux-amd64.zip.sha256)
+          for asset in dist/*; do cmp "$asset" "$RUNNER_TEMP/published/$(basename "$asset")"; done
+          # Les deux publications remplacées sont les seules identifiées avant cette publication.
+          for tag in radio-v2.3 radio-v2.4; do
+            if gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
+              gh release delete "$tag" --repo "$GH_REPO" --cleanup-tag --yes
+            fi
+          done

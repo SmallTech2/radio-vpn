@@ -2,6 +2,12 @@
 
 [Accueil et installation](../README.md#installer-le-serveur-vpn) · [Tous les guides](README.md)
 
+Les trois projets partagent un **versionnement officiel commun** : `v1.0.0`.
+Le fichier `VERSION` de chaque dépôt fait référence. Les évolutions sont coordonnées
+entre les trois dépôts, même si un seul projet change. La distribution officielle
+associe les trois projets en `v1.0.0` ; elle ne garantit pas toutes les combinaisons
+de versions historiques.
+
 Trois dépôts distincts assurent le cycle de vie du serveur :
 
 **Installation avec radio-vpn → sauvegarde avec radio-vpn-backup → reconstruction avec

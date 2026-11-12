@@ -46,7 +46,7 @@ Depuis un répertoire conservé après redémarrage, par exemple votre répertoi
 ```bash
 cd ~
 curl --fail --location --proto '=https' --proto-redir '=https' \
-  "https://raw.githubusercontent.com/SmallTech2/radio-vpn/radio-v2.4/Radio/deploy-vps.sh" \
+  "https://raw.githubusercontent.com/SmallTech2/radio-vpn/v1.0.0/Radio/deploy-vps.sh" \
   -o deploy-vps.sh
 ```
 

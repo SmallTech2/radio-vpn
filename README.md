@@ -23,7 +23,9 @@ Solution validée le 12 novembre 2026 sur Debian 13.7.
 
 ### Version stable et démarrage rapide
 
-Version stable publiée : **[radio-v2.4](https://github.com/SmallTech2/radio-vpn/releases/tag/radio-v2.4)**.
+**Version officielle actuelle : [v1.0.0](https://github.com/SmallTech2/radio-vpn/releases/tag/v1.0.0).**
+Référence : [VERSION](VERSION). Les trois projets partagent ce même numéro de version ;
+la distribution officielle associe radio-vpn, radio-vpn-backup et radio-vpn-restore en `v1.0.0`.
 Le [guide d’installation](docs/installation.md#télécharger-et-lancer-linstallateur-stable)
 fournit la commande de téléchargement figée sur cette version, avec vérification des empreintes.
 

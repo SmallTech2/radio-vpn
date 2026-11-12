@@ -8,7 +8,7 @@ BINARY="${1:-dist/openvpn-ui}"
 STAGE=$(mktemp -d)
 trap 'rm -rf -- "$STAGE"' EXIT
 cp "$BINARY" "$STAGE/openvpn-ui"
-cp -a static views swagger Radio docs README.md LICENSE "$STAGE/"
+cp -a static views swagger Radio docs README.md LICENSE VERSION "$STAGE/"
 DEPLOYMENT_COMMIT=$(git rev-parse HEAD)
 printf '%s\n' "${BINARY_SOURCE_COMMIT:-$DEPLOYMENT_COMMIT}" > "$STAGE/source-commit.txt"
 printf '%s\n' "$DEPLOYMENT_COMMIT" > "$STAGE/deployment-source-commit.txt"
